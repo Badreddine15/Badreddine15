@@ -1,9 +1,5 @@
 import pygame
-from utils import IMAGES_DIR
-
-
-def load_image(filename):
-    return pygame.image.load(str(IMAGES_DIR.joinpath(filename)))
+from utils import load_image
 
 
 class Player(object):
