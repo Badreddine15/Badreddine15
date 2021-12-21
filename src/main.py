@@ -1,4 +1,6 @@
 import pygame
+from player import Player
+from utils import IMAGES_DIR
 pygame.init()
 
 win = pygame.display.set_mode((0, 0))
@@ -7,14 +9,8 @@ pygame.display.set_caption("Project March")
 x1 = win.get_width()
 y1 = win.get_height()
 
-
-walkRight = [pygame.image.load('R1.png'), pygame.image.load('R2.png'), pygame.image.load('R3.png'), pygame.image.load('R4.png'), pygame.image.load('R5.png'), pygame.image.load('R6.png'), pygame.image.load('R7.png'), pygame.image.load('R8.png')]
-walkLeft = [pygame.image.load('L1.png'), pygame.image.load('L2.png'), pygame.image.load('L3.png'), pygame.image.load('L4.png'), pygame.image.load('L5.png'), pygame.image.load('L6.png'), pygame.image.load('L7.png'), pygame.image.load('L8.png')]
-bg = pygame.image.load('background_image.png')
-bg =pygame.transform.scale(bg, (1920, 1080))
-char = pygame.image.load('idle outline.gif')
-jumpima = pygame.image.load('jump outline.png')
-
+bg = pygame.image.load(str(IMAGES_DIR.joinpath('Background.png')))
+bg = pygame.transform.scale(bg, (1920, 1080))
 
 clock = pygame.time.Clock()
 
@@ -22,34 +18,6 @@ clock = pygame.time.Clock()
 
 
 run = True
-
-class player(object):
-    def __init__(self,x,y,width,height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.vel = 5
-        self.isJump = False
-        self.left = False
-        self.right = False
-        self.walkCount = 0
-        self.jumpCount = 10
-
-    def draw(self, win):
-        if self.walkCount + 1 >= 23:
-            self.walkCount = 0
-
-        if self.left:
-            win.blit(walkLeft[self.walkCount // 3], (self.x, self.y))
-            self.walkCount += 1
-        elif self.right:
-            win.blit(walkRight[self.walkCount // 3], (self.x, self.y))
-            self.walkCount += 1
-        elif self.isJump :
-            win.blit(jumpima, (self.x, self.y))
-        else:
-            win.blit(char, (self.x, self.y))
 
 
 def redrawGameWindow():
@@ -59,7 +27,7 @@ def redrawGameWindow():
     pygame.display.update()
 
 
-man = player(100, 970, 64, 64)
+man = Player(100, 970, 64, 64)
 run = True
 while run:
     clock.tick(23)
