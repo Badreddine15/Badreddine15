@@ -1,6 +1,8 @@
 import pygame
 import math
 from pygame.locals import *
+from cutscene import CutSceneManager, CutSceneOne
+
 
 
 pygame.init()
@@ -29,25 +31,14 @@ clock = pygame.time.Clock()
 
 
 
-def draw_speech_bubble(win, text, text_colour, bg_colour, pos, size):
 
-    font = pygame.font.SysFont(None, size)
-    text_surface = font.render(text, True, text_colour)
-    text_rect = text_surface.get_rect(midbottom=pos)
-
-    # background
-    bg_rect = text_rect.copy()
-    bg_rect.inflate_ip(10, 10)
-
-    # Frame
-    frame_rect = bg_rect.copy()
-    frame_rect.inflate_ip(4, 4)
-
-    pygame.draw.rect(win, text_colour, frame_rect)
-    pygame.draw.rect(win, bg_colour, bg_rect)
-    win.blit(text_surface, text_rect)
-
-
+class gun:
+    def __init__(self,x ,y):
+        self.x = x
+        self.y = y
+        self.image = player_weapon
+    def draw(self, win):
+        win.blit(self.image, (self.x, self.y))
 
 class player:
     def __init__(self,x,y,width,height):
@@ -70,13 +61,57 @@ class player:
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
 
-        rel_x, rel_y = mouse_x - man.x, mouse_y - man.y
+        rel_x, rel_y = mouse_x - self.x, mouse_y - self.y
         angle = (180 / math.pi) * -math.atan2(rel_y, rel_x)
         player_weapon_copy = pygame.transform.rotate(player_weapon, angle)
         win.blit(player_weapon_copy, (self.x + 15 - int(player_weapon_copy.get_width() / 2), self.y + 25-int(player_weapon_copy.get_height()/2)))
 
 
+    def update(self, cut_scene_manager):
+        keys = pygame.key.get_pressed()
+        if cut_scene_manager.cut_scene is None:
+            if keys[pygame.K_LEFT] or keys[pygame.K_q] and self.x > self.vel:
+                self.x -= self.vel
+                self.left = True
+                self.right = False
+            elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and self.x < x1 - self.width - self.vel:
+                self.x += self.vel
+                self.right = True
+                self.left = False
+            else:
+                self.right = False
+                self.left = False
+                self.walkCount = 0
 
+            if not (self.isJump):
+                if keys[pygame.K_SPACE]:
+                    self.isJump = True
+                    self.right = False
+                    self.left = False
+                    self.walkCount = 0
+            else:
+                if self.jumpCount >= -10:
+                    neg = 1
+                    if self.jumpCount < 0:
+                        neg = -1
+                    self.y -= (self.jumpCount ** 2) * 0.35 * neg
+                    self.jumpCount -= 1
+                else:
+                    self.isJump = False
+                    self.jumpCount = 10
+            if npc1.x - self.x <= 45 and npc1.x - self.x >= -45:
+                self.is_onnpc = True
+                if self.is_onnpc:
+                    cut_scene_manager.start_cut_scene(CutSceneOne(self))
+
+
+            if self.x == gun1.x:
+                self.is_onitem = True
+                if self.is_onitem:
+                    self.handle_weapons(win)
+
+            else:
+                print(self.is_onitem)
 
     def draw(self, win):
         if self.walkCount + 1 >= 23:
@@ -131,64 +166,27 @@ def redrawGameWindow():
     win.blit(bg, (0, 0))
     man.draw(win)
     npc1.draw(win)
-
+    cut_scene_manager.draw()
 
     pygame.display.update()
 
 
 man = player(0, 700, 64, 64)
 npc1 = npc_(500, 700)
+gun1 = gun(400, 700)
+cut_scene_manager = CutSceneManager(win)
+arme = man.handle_weapons(win)
 run = True
 while run:
     clock.tick(23)
 
-    true_scroll[0] += (man.x - true_scroll[0] - 152) / 20
-    true_scroll[1] += (man.y - true_scroll[1] - 106) / 20
-    scroll = true_scroll.copy()
-    scroll[0] = int(scroll[0])
-    scroll[1] = int(scroll[1])
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
 
-    keys = pygame.key.get_pressed()
-
-    if keys[pygame.K_LEFT] or keys[pygame.K_q] and man.x > man.vel:
-        man.x -= man.vel
-        man.left = True
-        man.right = False
-    elif keys[pygame.K_RIGHT]or keys[pygame.K_d] and man.x < x1 - man.width - man.vel:
-        man.x += man.vel
-        man.right = True
-        man.left = False
-    else:
-        man.right = False
-        man.left = False
-        man.walkCount = 0
-
-    if not (man.isJump):
-        if keys[pygame.K_SPACE]:
-            man.isJump = True
-            man.right = False
-            man.left = False
-            man.walkCount = 0
-    else:
-        if man.jumpCount >= -10:
-            neg = 1
-            if man.jumpCount < 0:
-                neg = -1
-            man.y -= (man.jumpCount ** 2) * 0.35 * neg
-            man.jumpCount -= 1
-        else:
-            man.isJump = False
-            man.jumpCount = 10
-    if npc1.x - man.x  <=45 and npc1.x - man.x >= -45:
-        man.is_onnpc = True
-        draw_speech_bubble(win, "Hello Player", (255, 255, 0), (175, 175, 0), npc1.rect.midtop, 25)
-        print("1")
-
-
+    man.update(cut_scene_manager)
+    cut_scene_manager.update()
     npc1.update(man)
     npc1.draw(win)
     redrawGameWindow()
