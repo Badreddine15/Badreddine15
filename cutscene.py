@@ -2,6 +2,7 @@ import pygame as pg
 
 
 def draw_text(screen, text, size, color, x, y):
+    '''Drawings objects on screen'''
     font = pg.font.SysFont(None, size)
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect()
@@ -30,7 +31,7 @@ class CutSceneOne:
         self.text_counter = 0
 
     def update(self):
-
+        '''Screen Updating'''
         pressed = pg.key.get_pressed()
         space = pressed[pg.K_SPACE]
 
